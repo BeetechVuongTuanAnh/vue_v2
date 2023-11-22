@@ -1,0 +1,1 @@
+export const shuffled = (list: Array<number>):Array<number> => list.sort(() => Math.random() - 0.5);
