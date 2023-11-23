@@ -8,26 +8,46 @@ const props = defineProps({
     card: {
         type: [String, Number, Array, Object]
     },
+    cardsContext: {
+        type: Array<number>,
+        default: () => [],
+    },
 })
 const isFlipped = ref(false)
-const emit = defineEmits(['onFlip', 'onFlipBackCard']);
+const isDisabled = ref(false)
+const emit = defineEmits(['onFlip']);
 const onToggleFlipCard = () => {
+    if (isDisabled.value) {
+        return false;
+    }
     isFlipped.value = !isFlipped.value;
-    if(isFlipped.value) {
+    if (isFlipped.value) {
         emit('onFlip', props.card)
     }
 }
 const onFlipBackCard = () => {
     isFlipped.value = false;
 }
+const onEnabledDisabledMode = () => {
+    isDisabled.value = true;
+}
+
+defineExpose({ onFlipBackCard, onEnabledDisabledMode });
 
 </script>
 
 <template>
-    <div class="card">
+    <div class="card" :class="{ disabled: isDisabled }" :style="{
+        height: `${(920 - 16 * 4) / Math.sqrt(props.cardsContext.length) - 16}px`,
+        width: `${((920 - 16 * 4) / Math.sqrt(props.cardsContext.length) - 16) * 0.75}px`,
+        perspective: `${((920 - 16 * 4) / Math.sqrt(props.cardsContext.length) - 16) * 1.5}px`,
+    }">
         <div class="card__inner" :class="{ 'is-flipped': isFlipped }" @click="onToggleFlipCard">
             <div class="card__face card_face--front">
-                <div class="card__content"></div>
+                <div class="card__content" :style="{
+                    'background-size': `${((920 - 16 * 4) / Math.sqrt(cardsContext.length) - 16) * 0.25}px 
+                                            ${((920 - 16 * 4) / Math.sqrt(cardsContext.length) - 16) * 0.25}px`,
+                }"></div>
             </div>
             <div class="card__face card_face--back">
                 <div class="card__content" :style="{ backgroundImage: `url('${props.imgBackFaceUrl}')` }"></div>
@@ -41,8 +61,6 @@ const onFlipBackCard = () => {
     display: inline-block;
     margin-right: 1rem;
     margin-bottom: 1rem;
-    width: 90px;
-    height: 120px;
 }
 
 .card__inner {
@@ -73,7 +91,6 @@ const onFlipBackCard = () => {
     background: url("/images/icon_back.png") no-repeat center center;
     width: 100%;
     height: 100%;
-    background-size: 40px 40px;
 }
 
 .card_face--back {
@@ -87,5 +104,9 @@ const onFlipBackCard = () => {
     background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
+}
+
+.card.disabled .card__inner {
+    cursor: default;
 }
 </style>

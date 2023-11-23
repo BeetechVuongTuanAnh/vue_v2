@@ -2,9 +2,12 @@
 import { ref } from 'vue'
 import MainScreen from "./components/MainScreen.vue";
 import InteractScreen from "./components/InteractScreen.vue";
+import ResultScreen from './components/ResultScreen.vue';
+import CopyRight from './components/CopyRight.vue';
 import { shuffled } from "./utils/array"
 
 const statusMatch = ref('default');
+const timer = ref(0);
 
 interface settingType {
     totalOfBlocks: number,
@@ -33,9 +36,16 @@ const onHandleBeforeStart = (config: configType) => {
     //data ready
     statusMatch.value = 'match';
 }
+
+const onGetResult = (config: configType) => {
+    timer.value = new Date().getTime() - settings.value.startedAt;
+    statusMatch.value = 'result';
+}
 </script>
 
 <template>
     <MainScreen v-if="statusMatch === 'default'" @onStart="onHandleBeforeStart" />
-    <InteractScreen v-if="statusMatch === 'match'" :cardsContext = "settings.cardsContext" />
+    <InteractScreen v-if="statusMatch === 'match'" :cardsContext = "settings.cardsContext" @onFinish="onGetResult" />
+    <ResultScreen v-if="statusMatch === 'result'" :timer="timer" @onStartAgain="statusMatch='default'" />
+    <CopyRight />
 </template>
